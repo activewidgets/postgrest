@@ -75,6 +75,10 @@ function extractCount(headers){
 
 function processResponse(res){
     
+    if (!res.ok && /json/.test(res.headers.get('Content-Type'))){
+        return res.json().then(e => {throw new Error([e.code || res.status, e.message, e.details, e.hint].join('\n'))});
+    }
+
     if (!res.ok){
         throw new Error(res.statusText || res.status);
     }
