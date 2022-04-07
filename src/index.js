@@ -4,7 +4,7 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { response, http, params, operations, convertFilter } from "@activewidgets/options";
+import { http, params, operations, data, convertFilter } from "@activewidgets/options";
 
 let ops = {
     '=': 'eq',
@@ -73,24 +73,13 @@ function extractCount(headers){
 }
 
 
-function processResponse(res){
+function convertData(items, res){
     
-    if (!res.ok && /json/.test(res.headers.get('Content-Type'))){
-        return res.json().then(e => {throw new Error([e.code || res.status, e.message, e.details, e.hint].join('\n'))});
+    if (!Array.isArray(items)){
+        return items;
     }
 
-    if (!res.ok){
-        throw new Error(res.statusText || res.status);
-    }
-    
-    return res.json().then(items => {
-        
-        if (!Array.isArray(items)){
-            return items;
-        }
-
-        return {items, count: extractCount(res.headers)};
-    });
+    return {items, count: extractCount(res.headers)};
 }
 
 
@@ -99,9 +88,9 @@ export function postgrest(serviceURL, fetchConfig){
     fetchConfig.headers['Prefer'] = 'count=exact';
 
     return [
-        response(processResponse),
         http(serviceURL, fetchConfig),
         operations(defineOperations),
-        params(convertParams)
+        params(convertParams),
+        data(convertData)
     ];
 }
