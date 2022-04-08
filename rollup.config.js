@@ -8,6 +8,7 @@ import rootpkg from './package.json';
 
 
 let globals = {
+    '@activewidgets/experimental': 'ActiveWidgets.Experimental',
     '@activewidgets/options': 'ActiveWidgets.Options'
 };
 
