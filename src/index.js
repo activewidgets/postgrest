@@ -26,8 +26,8 @@ function convertSort(expr){
 }
 
 
-function convertParams({limit, offset, sort, filter}){
-    return Object.assign({limit, offset, order: convertSort(sort)}, convertFilter(filter, format));
+function convertParams({limit, offset, orderBy, where}){
+    return Object.assign({limit, offset, order: convertSort(orderBy)}, convertFilter(where, format));
 }
 
 
