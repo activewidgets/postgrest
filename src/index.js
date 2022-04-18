@@ -4,30 +4,56 @@
  * LICENSE file in the root directory of this source tree.
  */
 
-import { http, params, operations, data, convertFilter } from "@activewidgets/options";
+import { http, params, operations, data, convertSort, convertFilter } from "@activewidgets/options";
+import {logical} from './logical.js';
 
-let ops = {
+const operators = {
+
+    /* equality */
     '=': 'eq',
-    '>': 'gt',
+    '<>': 'neq',
+    '!=': 'neq',
+
+    /* comparison */
     '<': 'lt',
-    '>=': 'ge',
-    '<=': 'le'
+    '>': 'gt',
+    '<=': 'lte',
+    '>=': 'gte',
+
+    /* text */
+    'LIKE': 'like',
+    'ILIKE': 'ilike',
+
+    /* logical */
+    'NOT': 'not',
+    'AND': 'and',
+    'OR': 'or'
 };
 
-let format = {
-    compare: (path, op, value) => ({[path.join('.')]: ops[op] + '.' + value})
+const formatting = {
+    equality: (name, operator, value) => ({[name]: `${operator}.${value}`}),
+    comparison: (name, operator, value) => ({[name]: `${operator}.${value}`}),
+    text: (name, operator, pattern) => ({[name]: `${operator}.${pattern.replace(/%/g, '*')}`}),
+    logical: (operator, expression) => logical(operator, expression)
+};
+
+function sortExpr(name, direction){
+    return `${name}.${direction}`;
 }
 
-
-function convertSort(expr){
-    if (expr){
-        return expr.replace(' ', '.');
-    }
+function mergeAll(items){
+    return items.join();
 }
 
+function convertParams({where, orderBy, limit, offset}){
 
-function convertParams({limit, offset, orderBy, where}){
-    return Object.assign({limit, offset, order: convertSort(orderBy)}, convertFilter(where, format));
+    let params = {
+        order: convertSort(orderBy, sortExpr, mergeAll, '.'),
+        limit, 
+        offset 
+    };
+
+    return Object.assign(params, convertFilter(where, operators, formatting, '.'));
 }
 
 
@@ -83,8 +109,9 @@ function convertData(items, res){
 }
 
 
-export function postgrest(serviceURL, fetchConfig){
+export function postgrest(serviceURL, fetchConfig = {}){
 
+    fetchConfig.headers = fetchConfig.headers || {};
     fetchConfig.headers['Prefer'] = 'count=exact';
 
     return [
