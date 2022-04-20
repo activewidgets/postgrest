@@ -1,6 +1,6 @@
 {
   "name": "@activewidgets/postgrest",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "ActiveWidgets PostgREST integration",
   "author": "ActiveWidgets SARL",
   "license": "MIT",
@@ -50,7 +50,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/activewidgets/postgrest.git"
+    "url": "https://github.com/activewidgets/postgrest.git"
   },
   "keywords": [
     "datagrid",
